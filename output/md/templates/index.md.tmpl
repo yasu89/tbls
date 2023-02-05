@@ -29,9 +29,11 @@
 
 {{ index $.groupErDiagrams $group }}
 {{ end }}
+{{- if ne (len .OutsideGroupTables) 0 }}
 ### {{ "Other" | lookup }}
 {{ range $t := .OutsideGroupTables }}
 |{{ range $d := $t }} {{ $d | nl2br }} |{{ end }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- if .Schema.Functions }}

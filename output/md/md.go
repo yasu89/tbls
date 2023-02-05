@@ -511,10 +511,6 @@ func (m *Md) makeSchemaTemplateData(s *schema.Schema) map[string]interface{} {
 		tablesHeader,
 		tablesHeaderLine,
 	)
-	outsideGroupTablesData = append(outsideGroupTablesData,
-		tablesHeader,
-		tablesHeaderLine,
-	)
 
 	for _, t := range s.Tables {
 		if tableGroups, ok := tableGroupsMap[t.Name]; ok {
@@ -548,6 +544,12 @@ func (m *Md) makeSchemaTemplateData(s *schema.Schema) map[string]interface{} {
 				groupTablesData[tableGroup] = append(groupTablesData[tableGroup], data)
 			}
 		} else {
+			if len(outsideGroupTablesData) == 0 {
+				outsideGroupTablesData = append(outsideGroupTablesData,
+					tablesHeader,
+					tablesHeaderLine,
+				)
+			}
 			outsideGroupTablesData = append(outsideGroupTablesData, data)
 		}
 	}
