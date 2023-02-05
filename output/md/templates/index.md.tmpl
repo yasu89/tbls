@@ -24,6 +24,10 @@
 {{ range $t := $tables }}
 |{{ range $d := $t }} {{ $d | nl2br }} |{{ end }}
 {{- end }}
+
+#### Group Relations
+
+{{ index $.groupErDiagrams $group }}
 {{ end }}
 ### {{ "Other" | lookup }}
 {{ range $t := .OutsideGroupTables }}

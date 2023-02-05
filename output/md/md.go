@@ -82,6 +82,7 @@ func (m *Md) OutputSchema(wr io.Writer, s *schema.Schema) error {
 	}
 	tmpl := template.Must(template.New("index").Funcs(output.Funcs(&m.config.MergedDict)).Parse(ts))
 	templateData := m.makeSchemaTemplateData(s)
+	groupErDiagrams := map[string]string{}
 	switch m.config.ER.Format {
 	case "mermaid":
 		buf := new(bytes.Buffer)
@@ -91,6 +92,17 @@ func (m *Md) OutputSchema(wr io.Writer, s *schema.Schema) error {
 		}
 		templateData["er"] = !m.config.ER.Skip
 		templateData["erDiagram"] = fmt.Sprintf("```mermaid\n%s```", buf.String())
+		for groupName, tableNames := range m.config.Format.TableGroups {
+			buf := new(bytes.Buffer)
+			groupSchema, err := s.NewSchemaForTableGroup(groupName, tableNames)
+			if err != nil {
+				return errors.WithStack(err)
+			}
+			if err := mmd.OutputSchema(buf, groupSchema); err != nil {
+				return err
+			}
+			groupErDiagrams[groupName] = fmt.Sprintf("```mermaid\n%s```", buf.String())
+		}
 	default:
 		if m.er {
 			templateData["er"] = !m.config.ER.Skip
@@ -98,8 +110,12 @@ func (m *Md) OutputSchema(wr io.Writer, s *schema.Schema) error {
 			templateData["er"] = false
 		}
 		templateData["erDiagram"] = fmt.Sprintf("![er](%sschema.%s)", m.config.BaseUrl, m.config.ER.Format)
+		for groupName, _ := range m.config.Format.TableGroups {
+			groupErDiagrams[groupName] = fmt.Sprintf("![er](%s%s_group_schema.%s)", m.config.BaseUrl, groupName, m.config.ER.Format)
+		}
 	}
 
+	templateData["groupErDiagrams"] = groupErDiagrams
 	templateData["showOnlyFirstParagraph"] = m.config.Format.ShowOnlyFirstParagraph
 	err = tmpl.Execute(wr, templateData)
 	if err != nil {
