@@ -468,7 +468,16 @@ func (m *Md) makeSchemaTemplateData(s *schema.Schema) map[string]interface{} {
 	number := m.config.Format.Number
 	adjust := m.config.Format.Adjust
 
-	tablesData := [][]string{}
+	allTablesData := [][]string{}
+	tableGroupsMap := map[string][]string{}
+	for groupName, tableNames := range m.config.Format.TableGroups {
+		for _, tableName := range tableNames {
+			tableGroupsMap[tableName] = append(tableGroupsMap[tableName], groupName)
+		}
+	}
+
+	groupTablesData := map[string][][]string{}
+	outsideGroupTablesData := [][]string{}
 	tablesHeader := []string{
 		m.config.MergedDict.Lookup("Name"),
 		m.config.MergedDict.Lookup("Columns"),
@@ -482,12 +491,27 @@ func (m *Md) makeSchemaTemplateData(s *schema.Schema) map[string]interface{} {
 		tablesHeaderLine = append(tablesHeaderLine, "------")
 	}
 
-	tablesData = append(tablesData,
+	allTablesData = append(allTablesData,
+		tablesHeader,
+		tablesHeaderLine,
+	)
+	outsideGroupTablesData = append(outsideGroupTablesData,
 		tablesHeader,
 		tablesHeaderLine,
 	)
 
 	for _, t := range s.Tables {
+		if tableGroups, ok := tableGroupsMap[t.Name]; ok {
+			for _, tableGroup := range tableGroups {
+				if len(groupTablesData[tableGroup]) == 0 {
+					groupTablesData[tableGroup] = append(groupTablesData[tableGroup],
+						tablesHeader,
+						tablesHeaderLine,
+					)
+				}
+			}
+		}
+
 		comment := t.Comment
 		if m.config.Format.ShowOnlyFirstParagraph {
 			comment = output.ShowOnlyFirstParagraph(comment)
@@ -501,11 +525,22 @@ func (m *Md) makeSchemaTemplateData(s *schema.Schema) map[string]interface{} {
 		if s.HasTableWithLabels() {
 			data = append(data, output.LabelJoin(t.Labels))
 		}
-		tablesData = append(tablesData, data)
+
+		allTablesData = append(allTablesData, data)
+		if tableGroups, ok := tableGroupsMap[t.Name]; ok {
+			for _, tableGroup := range tableGroups {
+				groupTablesData[tableGroup] = append(groupTablesData[tableGroup], data)
+			}
+		} else {
+			outsideGroupTablesData = append(outsideGroupTablesData, data)
+		}
 	}
 
 	if number {
-		tablesData = m.addNumberToTable(tablesData)
+		allTablesData = m.addNumberToTable(allTablesData)
+		for _, tablesData := range groupTablesData {
+			tablesData = m.addNumberToTable(tablesData)
+		}
 	}
 
 	tablesSubroutineData := [][]string{}
@@ -532,17 +567,20 @@ func (m *Md) makeSchemaTemplateData(s *schema.Schema) map[string]interface{} {
 	}
 
 	if adjust {
-		return map[string]interface{}{
-			"Schema":    s,
-			"Tables":    adjustTable(tablesData),
-			"Functions": adjustTable(tablesSubroutineData),
+		allTablesData = adjustTable(allTablesData)
+		for _, tablesData := range groupTablesData {
+			tablesData = adjustTable(tablesData)
 		}
+		outsideGroupTablesData = adjustTable(outsideGroupTablesData)
+		tablesSubroutineData = adjustTable(tablesSubroutineData)
 	}
 
 	return map[string]interface{}{
-		"Schema":    s,
-		"Tables":    tablesData,
-		"Functions": tablesSubroutineData,
+		"Schema":             s,
+		"AllTables":          allTablesData,
+		"GroupTables":        groupTablesData,
+		"OutsideGroupTables": outsideGroupTablesData,
+		"Functions":          tablesSubroutineData,
 	}
 }
 

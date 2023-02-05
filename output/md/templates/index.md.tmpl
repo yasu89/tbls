@@ -14,8 +14,21 @@
 {{- end }}
 
 ## {{ "Tables" | lookup }}
-{{ range $t := .Tables }}
+{{- if eq (len .GroupTables) 0 }}
+{{ range $t := .AllTables }}
 |{{ range $d := $t }} {{ $d | nl2br }} |{{ end }}
+{{- end -}}
+{{- else }}
+{{ range $group, $tables := .GroupTables }}
+### {{ $group }}
+{{ range $t := $tables }}
+|{{ range $d := $t }} {{ $d | nl2br }} |{{ end }}
+{{- end }}
+{{ end }}
+### {{ "Other" | lookup }}
+{{ range $t := .OutsideGroupTables }}
+|{{ range $d := $t }} {{ $d | nl2br }} |{{ end }}
+{{- end -}}
 {{- end -}}
 {{- if .Schema.Functions }}
 
