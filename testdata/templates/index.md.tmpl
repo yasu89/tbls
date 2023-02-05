@@ -16,7 +16,7 @@
 {{- end }}
 
 ## {{ "Tables" | lookup }}
-{{ range $t := .Tables }}
+{{ range $t := .AllTables }}
 |{{ range $d := $t }} {{ $d | nl2br }} |{{ end }}
 {{- end -}}
 {{- if .er }}
