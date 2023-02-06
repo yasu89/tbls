@@ -14,20 +14,21 @@
 {{- end }}
 
 ## {{ "Tables" | lookup }}
-{{- if eq (len .GroupTables) 0 }}
+{{- if eq (len .TableGroupNames) 0 }}
 {{ range $t := .AllTables }}
 |{{ range $d := $t }} {{ $d | nl2br }} |{{ end }}
 {{- end -}}
 {{- else }}
-{{ range $group, $tables := .GroupTables }}
-### {{ $group }}
+{{ range $tableGroupName := .TableGroupNames }}
+{{ $tables := index $.GroupTables $tableGroupName }}
+### {{ $tableGroupName }}
 {{ range $t := $tables }}
 |{{ range $d := $t }} {{ $d | nl2br }} |{{ end }}
 {{- end }}
 
 #### Group Relations
 
-{{ index $.groupErDiagrams $group }}
+{{ index $.groupErDiagrams $tableGroupName }}
 {{ end }}
 {{- if ne (len .OutsideGroupTables) 0 }}
 ### {{ "Other" | lookup }}
