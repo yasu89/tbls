@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"text/template"
@@ -542,6 +541,7 @@ func (m *Md) makeSchemaTemplateData(s *schema.Schema) map[string]interface{} {
 			tableGroupsMap[table] = append(tableGroupsMap[table], tableGroup.Name)
 		}
 	}
+
 	groupTables := map[string][]*schema.Table{}
 	var outsideGroupTables []*schema.Table
 	for _, t := range s.Tables {
@@ -601,12 +601,12 @@ func (m *Md) makeSchemaTemplateData(s *schema.Schema) map[string]interface{} {
 		tablesSubroutineData = adjustTable(tablesSubroutineData)
 	}
 
-	// Sort tableGroupNames because map iteration order is not specified
 	var tableGroupNames []string
-	for tableGroupName, _ := range groupTablesData {
-		tableGroupNames = append(tableGroupNames, tableGroupName)
+	for _, tableGroup := range m.config.Format.TableGroups {
+		if _, ok := groupTablesData[tableGroup.Name]; ok {
+			tableGroupNames = append(tableGroupNames, tableGroup.Name)
+		}
 	}
-	sort.Strings(tableGroupNames)
 
 	return map[string]interface{}{
 		"Schema":             s,
