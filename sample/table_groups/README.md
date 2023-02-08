@@ -30,8 +30,8 @@ Sample database document.
 
 ### Group Tables
 
-| Name | Columns | Comment | Type |
-| ---- | ------- | ------- | ---- |
+| Name | Columns | Comment | Type | Labels |
+| ---- | ------- | ------- | ---- | ------ |
 | [post_comments](post_comments.md) | 7 | post and comments View table | VIEW |  |
 | [posts](posts.md) | 7 | Posts table | BASE TABLE | `green` `red` `blue` |
 
