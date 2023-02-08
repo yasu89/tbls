@@ -32,12 +32,12 @@ func (d *DSN) UnmarshalYAML(data []byte) error {
 func (f Format) MarshalYAML() ([]byte, error) {
 	if len(f.HideColumnsWithoutValues) == 0 {
 		s := struct {
-			Adjust                   bool                `yaml:"adjust,omitempty"`
-			Sort                     bool                `yaml:"sort,omitempty"`
-			Number                   bool                `yaml:"number,omitempty"`
-			ShowOnlyFirstParagraph   bool                `yaml:"showOnlyFirstParagraph,omitempty"`
-			HideColumnsWithoutValues bool                `yaml:"hideColumnsWithoutValues,omitempty"`
-			TableGroups              map[string][]string `yaml:"tableGroups,omitempty"`
+			Adjust                   bool         `yaml:"adjust,omitempty"`
+			Sort                     bool         `yaml:"sort,omitempty"`
+			Number                   bool         `yaml:"number,omitempty"`
+			ShowOnlyFirstParagraph   bool         `yaml:"showOnlyFirstParagraph,omitempty"`
+			HideColumnsWithoutValues bool         `yaml:"hideColumnsWithoutValues,omitempty"`
+			TableGroups              []TableGroup `yaml:"tableGroups,omitempty"`
 		}{
 			Adjust:                   f.Adjust,
 			Sort:                     f.Sort,
@@ -53,12 +53,12 @@ func (f Format) MarshalYAML() ([]byte, error) {
 
 func (f *Format) UnmarshalYAML(data []byte) error {
 	s := struct {
-		Adjust                   bool                `yaml:"adjust,omitempty"`
-		Sort                     bool                `yaml:"sort,omitempty"`
-		Number                   bool                `yaml:"number,omitempty"`
-		ShowOnlyFirstParagraph   bool                `yaml:"showOnlyFirstParagraph,omitempty"`
-		HideColumnsWithoutValues interface{}         `yaml:"hideColumnsWithoutValues,omitempty"`
-		TableGroups              map[string][]string `yaml:"tableGroups,omitempty"`
+		Adjust                   bool         `yaml:"adjust,omitempty"`
+		Sort                     bool         `yaml:"sort,omitempty"`
+		Number                   bool         `yaml:"number,omitempty"`
+		ShowOnlyFirstParagraph   bool         `yaml:"showOnlyFirstParagraph,omitempty"`
+		HideColumnsWithoutValues interface{}  `yaml:"hideColumnsWithoutValues,omitempty"`
+		TableGroups              []TableGroup `yaml:"tableGroups,omitempty"`
 	}{}
 	if err := yaml.Unmarshal(data, &s); err != nil {
 		return err

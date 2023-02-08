@@ -144,13 +144,13 @@ func withDot(s *schema.Schema, c *config.Config, force bool) error {
 	}
 
 	// group schema
-	for groupName, tableNames := range c.Format.TableGroups {
-		groupSchema, err := s.NewSchemaForTableGroup(groupName, tableNames)
+	for _, tableGroup := range c.Format.TableGroups {
+		groupSchema, err := s.NewSchemaForTableGroup(tableGroup.Name, tableGroup.Tables)
 		if err != nil {
 			return errors.WithStack(err)
 		}
 
-		groupErFileName := fmt.Sprintf("%s_group_schema.%s", groupName, erFormat)
+		groupErFileName := fmt.Sprintf("%s_group_schema.%s", tableGroup.Name, erFormat)
 		fmt.Printf("%s\n", filepath.Join(outputPath, groupErFileName))
 
 		file, err := os.OpenFile(filepath.Join(fullPath, groupErFileName), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec

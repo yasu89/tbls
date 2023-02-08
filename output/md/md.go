@@ -93,16 +93,16 @@ func (m *Md) OutputSchema(wr io.Writer, s *schema.Schema) error {
 		}
 		templateData["er"] = !m.config.ER.Skip
 		templateData["erDiagram"] = fmt.Sprintf("```mermaid\n%s```", buf.String())
-		for groupName, tableNames := range m.config.Format.TableGroups {
+		for _, tableGroup := range m.config.Format.TableGroups {
 			buf := new(bytes.Buffer)
-			groupSchema, err := s.NewSchemaForTableGroup(groupName, tableNames)
+			groupSchema, err := s.NewSchemaForTableGroup(tableGroup.Name, tableGroup.Tables)
 			if err != nil {
 				return errors.WithStack(err)
 			}
 			if err := mmd.OutputSchema(buf, groupSchema); err != nil {
 				return err
 			}
-			groupErDiagrams[groupName] = fmt.Sprintf("```mermaid\n%s```", buf.String())
+			groupErDiagrams[tableGroup.Name] = fmt.Sprintf("```mermaid\n%s```", buf.String())
 		}
 	default:
 		if m.er {
@@ -111,8 +111,8 @@ func (m *Md) OutputSchema(wr io.Writer, s *schema.Schema) error {
 			templateData["er"] = false
 		}
 		templateData["erDiagram"] = fmt.Sprintf("![er](%sschema.%s)", m.config.BaseUrl, m.config.ER.Format)
-		for groupName, _ := range m.config.Format.TableGroups {
-			groupErDiagrams[groupName] = fmt.Sprintf("![er](%s%s_group_schema.%s)", m.config.BaseUrl, groupName, m.config.ER.Format)
+		for _, tableGroup := range m.config.Format.TableGroups {
+			groupErDiagrams[tableGroup.Name] = fmt.Sprintf("![er](%s%s_group_schema.%s)", m.config.BaseUrl, tableGroup.Name, m.config.ER.Format)
 		}
 	}
 
@@ -537,9 +537,9 @@ func (m *Md) makeSchemaTemplateData(s *schema.Schema) map[string]interface{} {
 	adjust := m.config.Format.Adjust
 
 	tableGroupsMap := map[string][]string{}
-	for groupName, tableNames := range m.config.Format.TableGroups {
-		for _, tableName := range tableNames {
-			tableGroupsMap[tableName] = append(tableGroupsMap[tableName], groupName)
+	for _, tableGroup := range m.config.Format.TableGroups {
+		for _, table := range tableGroup.Tables {
+			tableGroupsMap[table] = append(tableGroupsMap[table], tableGroup.Name)
 		}
 	}
 	groupTables := map[string][]*schema.Table{}
