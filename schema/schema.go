@@ -205,15 +205,6 @@ L:
 	return nil, errors.Errorf("not found relation '%v, %v'", cs, pcs)
 }
 
-func (s *Schema) HasTableWithLabels() bool {
-	for _, t := range s.Tables {
-		if len(t.Labels) > 0 {
-			return true
-		}
-	}
-	return false
-}
-
 // NewSchemaForTableGroup create new instance Schema for table group ER diagram
 func (s *Schema) NewSchemaForTableGroup(groupName string, tableNames []string) (*Schema, error) {
 	groupSchema := &Schema{
