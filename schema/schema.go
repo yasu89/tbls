@@ -86,6 +86,7 @@ type Column struct {
 	ChildRelations  []*Relation     `json:"-"`
 	PK              bool            `json:"-"`
 	FK              bool            `json:"-"`
+	HideForER       bool            `json:"-"`
 }
 
 // Table is the struct for database table
@@ -113,6 +114,7 @@ type Relation struct {
 	ParentCardinality Cardinality `json:"parent_cardinality" yaml:"parentCardinality"`
 	Def               string      `json:"def"`
 	Virtual           bool        `json:"virtual"`
+	HideForER         bool        `json:"-"`
 }
 
 type DriverMeta struct {
@@ -320,36 +322,6 @@ func (t *Table) ShowColumn(name string, hideColumns []string) bool {
 		return t.hasColumnWithValues(name)
 	}
 	return true
-}
-
-// FindShowColumnsForER find show columns for ER Diagram
-func (t *Table) FindShowColumnsForER(hideNotRelatedColumn bool, relations []*Relation) []*Column {
-	if !hideNotRelatedColumn {
-		return t.Columns
-	}
-
-	// Show only columns with relation
-	relatedColumnNameMap := map[string]bool{}
-	for _, r := range relations {
-		if t.Name == r.Table.Name {
-			for _, c := range r.Columns {
-				relatedColumnNameMap[c.Name] = true
-			}
-		}
-		if t.Name == r.ParentTable.Name {
-			for _, c := range r.ParentColumns {
-				relatedColumnNameMap[c.Name] = true
-			}
-		}
-	}
-
-	var columns []*Column
-	for _, c := range t.Columns {
-		if relatedColumnNameMap[c.Name] {
-			columns = append(columns, c)
-		}
-	}
-	return columns
 }
 
 // Sort schema tables, columns, relations, and constrains
