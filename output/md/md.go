@@ -500,15 +500,15 @@ func (m *Md) makeTablesData(tables []*schema.Table) [][]string {
 	}
 	tablesHeaderLine := []string{"----", "-------", "-------", "----"}
 
-	tablesData = append(tablesData,
-		tablesHeader,
-		tablesHeaderLine,
-	)
-
 	if containsTableWithLabels(tables) {
 		tablesHeader = append(tablesHeader, m.config.MergedDict.Lookup("Labels"))
 		tablesHeaderLine = append(tablesHeaderLine, "------")
 	}
+
+	tablesData = append(tablesData,
+		tablesHeader,
+		tablesHeaderLine,
+	)
 
 	for _, t := range tables {
 		comment := t.Comment
